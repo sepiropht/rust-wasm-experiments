@@ -10,6 +10,7 @@ const BALL_MASS = 1.3;
 const BALL_GRAVITY = 1;
 const BALL_ELASTICITY = 0.98;
 const BALL_FRICTION = 1;
+const BALL_RADIUS = 15;
 
 import("../crate/pkg")
   .then(module => {
@@ -93,7 +94,6 @@ import("../crate/pkg")
 
     const drawFunc = {
       "wasm-compute-js-render-canvas": function () {
-        canvasCtx.clearRect(0, 0, stage.width, stage.height);
         Balls.drawWasmBallsToCtx(canvasCtx, "purple");
       },
       // "wasm-compute-wasm-render-html": function() {
@@ -163,7 +163,12 @@ import("../crate/pkg")
     let lastFrameTimeMs = 0;
 
     const balls = {
-      wasm: Balls.makeBalls(MAX_BALLS, stage.width, stage.height),
+      wasm: Balls.makeBalls(MAX_BALLS,
+        BALL_RADIUS,
+        BALL_MASS,
+        BALL_GRAVITY,
+        BALL_ELASTICITY,
+        BALL_FRICTION, stage.width, stage.height),
       js: Array.from(Array(MAX_BALLS), _ => makeBall({
         wasm: false
       }))

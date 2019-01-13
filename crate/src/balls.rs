@@ -31,8 +31,18 @@ impl Balls {
         }
     }
     #[wasm_bindgen(js_name=makeBalls)]
-    pub fn make_balls(&mut self, max_balls: u32, stage_width: f64, stage_height: f64) {
-        self.balls = (0..max_balls).map(|_| Ball::default()).collect();
+    pub fn make_balls(&mut self,  
+        quantity: i32,
+        radius: f64,
+        mass: f64,
+        gravity: f64,
+        elasticity: f64,
+        friction: f64,
+        stage_width: f64, 
+        stage_height: f64) {
+        self.balls = (0..quantity).map(|_| Ball::new(
+                0.0, 0.0, 0.0, 0.0, radius, mass, gravity, elasticity, friction,
+            )).collect();
         self.width = stage_width;
         self.heigth = stage_height;
     }
@@ -83,10 +93,11 @@ impl Balls {
 
     #[wasm_bindgen(js_name=drawWasmBallsToCtx)]
     pub fn draw__wasms_balls_to_ctx(
-        self,
+        &self,
         ctx: &web_sys::CanvasRenderingContext2d,
         color: &JsValue,
     ) {
+        ctx.clear_rect(0.0, 0.0, self.width, self.heigth);
         self.balls
             .iter()
             .for_each(|ball| draw_wasm_ball_to_ctx(&ball, ctx, color));

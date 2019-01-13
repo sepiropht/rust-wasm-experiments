@@ -1,7 +1,13 @@
 use ball::Ball;
 use render::*;
-use std::cell::RefCell;
 use wasm_bindgen::prelude::*;
+
+
+#[wasm_bindgen]
+extern "C" {
+    #[wasm_bindgen(js_namespace = console)]
+    fn log(message: String);
+}
 
 #[wasm_bindgen]
 #[derive(Debug, Clone)]
@@ -39,30 +45,38 @@ impl Balls {
             .iter_mut()
             .for_each(|ref mut ball| ball.set_random_position_and_speed_in_bounds(width, heigth))
     }
+    fn step(&mut self) {
+        self.balls.iter_mut().for_each(|ball| {
+            ball.step();
+        })
+    }
+
+    fn manage_stage_border_collision(&mut self, stage_width: f64, stage_height: f64) {
+        self.balls.iter_mut().for_each(|ball| {
+            ball.manage_stage_border_collision(stage_width, stage_height);
+        })
+    }
 
     #[wasm_bindgen(js_name=updateBalls)]
     pub fn update_balls(&mut self) {
+        
         let width = self.width;
         let heigth = self.heigth;
-
         // move balls
-        {
-            let mut balls = RefCell::new(&mut self.balls);
-            // move balls
-            balls.get_mut().iter_mut().for_each(|ball| ball.step());
-            // check balls vs border collision
-            balls
-                .get_mut()
-                .iter_mut()
-                .for_each(|ball| ball.manage_stage_border_collision(width, heigth));
-        }
+        self.step();
+        // check balls vs border collision
+        self.manage_stage_border_collision(width, heigth);
         // check ball vs ball collision
+        
         for i in 0..self.balls.len() {
             let (ball1, ball2) = self.balls.split_at_mut(i + 1);
             for j in 0..ball2.len() {
+                log("yeah".to_string());
                 if ball1[i].check_ball_collision(&mut ball2[j]) == true {
+                  log("yea".to_string());
                     ball1[i].resolve_ball_collision(&mut ball2[j]);
                 }
+                log("ye".to_string());
             }
         }
     }

@@ -7,6 +7,7 @@ mod ball;
 mod render;
 #[allow(non_snake_case)]
 mod vector2D;
+mod balls;
 
 // use wasm_bindgen::prelude::*;
 

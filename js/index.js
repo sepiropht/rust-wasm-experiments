@@ -1,5 +1,9 @@
-import { makeStage } from "./utils";
-import { prepareUI } from "./ui";
+import {
+  makeStage
+} from "./utils";
+import {
+  prepareUI
+} from "./ui";
 import BallJS from "./libs/Ball";
 
 const BALL_MASS = 1.3;
@@ -13,6 +17,8 @@ import("../crate/pkg")
      * Factory that will return either the original JavaScript version or the WebAssembly one
      * Specify a `wasm` boolean as an attribute to choose either version
      */
+    const Balls = new module.Balls();
+
     function makeBall({
       x = 0,
       y = 0,
@@ -25,7 +31,7 @@ import("../crate/pkg")
       friction = BALL_FRICTION,
       wasm = true
     } = {}) {
-      return new (wasm ? module.Ball : BallJS)(
+      return new(wasm ? module.Ball : BallJS)(
         x,
         y,
         velocityX,
@@ -60,7 +66,8 @@ import("../crate/pkg")
      */
     function update(d) {
       delta = d;
-      updateBalls(balls["wasm"]);
+      //updateBalls(balls["wasm"]);
+      Balls.updateBalls();
       updateBalls(balls["js"]);
     }
 
@@ -85,31 +92,29 @@ import("../crate/pkg")
     }
 
     const drawFunc = {
-      "wasm-compute-wasm-render-canvas": function() {
+      "wasm-compute-js-render-canvas": function () {
         canvasCtx.clearRect(0, 0, stage.width, stage.height);
-        balls["wasm"].forEach(ball =>
-          module.drawWasmBallToCtx(ball, canvasCtx, "purple")
-        );
+        Balls.drawWasmBallsToCtx(canvasCtx, "purple");
       },
-      "wasm-compute-wasm-render-html": function() {
-        htmlRenderNode.innerHTML = balls["wasm"]
-          .map(ball => module.drawWasmBallToHtml(ball, "green"))
-          .join("");
-      },
-      "wasm-compute-js-render-canvas": function() {
-        canvasCtx.clearRect(0, 0, stage.width, stage.height);
-        balls["wasm"].forEach(ball => drawJsBallToCtx(ball, canvasCtx, "blue"));
-      },
-      "wasm-compute-js-render-html": function() {
-        htmlRenderNode.innerHTML = balls["wasm"]
-          .map(ball => drawJsBallToHtml(ball, "darkblue"))
-          .join("");
-      },
-      "js-compute-js-render-canvas": function() {
+      // "wasm-compute-wasm-render-html": function() {
+      //   htmlRenderNode.innerHTML = balls["wasm"]
+      //     .map(ball => Balls.drawWasmBallToHtml(ball, "green"))
+      //     .join("");
+      // },
+      // "wasm-compute-js-render-canvas": function() {
+      //   canvasCtx.clearRect(0, 0, stage.width, stage.height);
+      //   balls["wasm"].forEach(ball => drawJsBallToCtx(ball, canvasCtx, "blue"));
+      // },
+      // "wasm-compute-js-render-html": function() {
+      //   htmlRenderNode.innerHTML = balls["wasm"]
+      //     .map(ball => drawJsBallToHtml(ball, "darkblue"))
+      //     .join("");
+      // },
+      "js-compute-js-render-canvas": function () {
         canvasCtx.clearRect(0, 0, stage.width, stage.height);
         balls["js"].forEach(ball => drawJsBallToCtx(ball, canvasCtx, "red"));
       },
-      "js-compute-js-render-html": function() {
+      "js-compute-js-render-html": function () {
         htmlRenderNode.innerHTML = balls["js"]
           .map(ball => drawJsBallToHtml(ball, "darkred"))
           .join("");
@@ -124,6 +129,7 @@ import("../crate/pkg")
         4
       )}ms - FrameRate: ${Math.round(1000 / delta)} FPS`;
       // draw balls in selected mode
+      console.info(stage.mode)
       drawFunc[stage.mode]();
     }
 
@@ -141,8 +147,15 @@ import("../crate/pkg")
 
     const MAX_BALLS = 10;
 
-    const { stage } = makeStage();
-    const { infosNode, canvasCtx, htmlRenderNode, shuffleButton } = prepareUI(
+    const {
+      stage
+    } = makeStage();
+    const {
+      infosNode,
+      canvasCtx,
+      htmlRenderNode,
+      shuffleButton
+    } = prepareUI(
       stage
     );
 
@@ -150,14 +163,17 @@ import("../crate/pkg")
     let lastFrameTimeMs = 0;
 
     const balls = {
-      wasm: Array.from(Array(MAX_BALLS), _ => makeBall()),
-      js: Array.from(Array(MAX_BALLS), _ => makeBall({ wasm: false }))
+      wasm: Balls.makeBalls(MAX_BALLS, stage.width, stage.height),
+      js: Array.from(Array(MAX_BALLS), _ => makeBall({
+        wasm: false
+      }))
     };
 
     const shuffle = () => {
-      balls["wasm"].forEach(ball => {
-        ball.setRandomPositionAndSpeedInBounds(stage.width, stage.height);
-      });
+      // balls["wasm"].forEach(ball => {
+      //   ball.setRandomPositionAndSpeedInBounds(stage.width, stage.height);
+      // });
+      Balls.setRandomPositionAndSpeedInBounds();
       balls["js"].forEach(ball => {
         ball.setRandomPositionAndSpeedInBounds(stage.width, stage.height);
       });

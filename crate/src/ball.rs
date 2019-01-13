@@ -18,7 +18,7 @@ extern "C" {
 }
 
 #[wasm_bindgen]
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Ball {
     pub x: f64,
     pub y: f64,
